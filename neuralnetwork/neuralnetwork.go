@@ -60,7 +60,6 @@ func New(ni, nh, no int, regression bool) *NeuralNetwork {
 	for i := 0; i < nn.ni; i++ {
 		for j := 0; j < nn.nh; j++ {
 			nn.wi[i][j] = randomFloat32(-1, 1)
-			fmt.Println(nn.wi[i][j])
 		}
 	}
 
