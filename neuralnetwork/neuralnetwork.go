@@ -1,4 +1,4 @@
-package main
+package neuralnetwork
 
 import (
 	"fmt"
@@ -177,40 +177,6 @@ func (nn *NeuralNetwork) Train(patterns [][][]float32, iterations int, lRate, mF
 
 func (nn *NeuralNetwork) Test(patterns [][][]float32) {
 	for _, p := range patterns {
-		fmt.Println(p[0], "->", nn.Update(p[0]))
+		fmt.Println(p[0], "->", nn.Update(p[0]), " : ", p[1])
 	}
-}
-
-func main() {
-	rand.Seed(0)
-	patterns := [][][]float32{
-		{{0, 0}, {0}},
-		{{0, 1}, {1}},
-		{{1, 0}, {1}},
-		{{1, 1}, {0}},
-	}
-
-	// patterns := [][][]float32{
-	// 	{{0}, {0}},
-	// 	{{1}, {1}},
-	// 	{{2}, {4}},
-	// 	{{3}, {9}},
-	// 	{{4}, {16}},
-	// 	{{5}, {25}},
-	// 	{{6}, {36}},
-	// 	{{7}, {49}},
-	// 	{{8}, {64}},
-	// 	{{9}, {81}},
-	// 	{{10}, {100}},
-	// 	{{11}, {121}},
-	// }
-
-	nn := New(2, 2, 1, false)
-
-	fmt.Println(nn)
-
-	nn.Train(patterns, 1000, 0.5, 0.2)
-
-	nn.Test(patterns)
-
 }
