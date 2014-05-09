@@ -6,31 +6,31 @@ import (
 	"math/rand"
 )
 
-func randomFloat32(a, b float32) float32 {
-	return (b-a)*rand.Float32() + a
+func random(a, b float64) float64 {
+	return (b-a)*rand.Float64() + a
 }
 
-func matrix(I, J int) [][]float32 {
-	m := make([][]float32, I)
+func matrix(I, J int) [][]float64 {
+	m := make([][]float64, I)
 	for i := 0; i < I; i++ {
-		m[i] = make([]float32, J)
+		m[i] = make([]float64, J)
 	}
 	return m
 }
 
-func vector(I int, fill float32) []float32 {
-	v := make([]float32, I)
+func vector(I int, fill float64) []float64 {
+	v := make([]float64, I)
 	for i := 0; i < I; i++ {
 		v[i] = fill
 	}
 	return v
 }
 
-func sigmoid(x float32) float32 {
-	return float32(math.Tanh(float64(x)))
+func sigmoid(x float64) float64 {
+	return math.Tanh(x)
 }
 
-func dsigmoid(y float32) float32 {
+func dsigmoid(y float64) float64 {
 	return 1.0 - y*y
 }
 
@@ -40,11 +40,11 @@ type NeuralNetwork struct {
 	// Whether it is regression or not
 	regression bool
 	// Activations for nodes
-	ai, ah, ao []float32
+	ai, ah, ao []float64
 	// Weights
-	wi, wo [][]float32
+	wi, wo [][]float64
 	// Last change in weights for momentum
-	ci, co [][]float32
+	ci, co [][]float64
 }
 
 func New(ni, nh, no int, regression bool) *NeuralNetwork {
@@ -59,13 +59,13 @@ func New(ni, nh, no int, regression bool) *NeuralNetwork {
 
 	for i := 0; i < nn.ni; i++ {
 		for j := 0; j < nn.nh; j++ {
-			nn.wi[i][j] = randomFloat32(-1, 1)
+			nn.wi[i][j] = random(-1, 1)
 		}
 	}
 
 	for i := 0; i < nn.nh; i++ {
 		for j := 0; j < nn.no; j++ {
-			nn.wo[i][j] = randomFloat32(-1, 1)
+			nn.wo[i][j] = random(-1, 1)
 		}
 	}
 
@@ -75,10 +75,10 @@ func New(ni, nh, no int, regression bool) *NeuralNetwork {
 	return nn
 }
 
-func (nn *NeuralNetwork) Update(inputs []float32) []float32 {
+func (nn *NeuralNetwork) Update(inputs []float64) []float64 {
 	if len(inputs) != nn.ni-1 {
 		fmt.Println("Error: wrong number of inputs")
-		return []float32{} // should return error
+		return []float64{} // should return error
 	}
 
 	for i := 0; i < nn.ni-1; i++ {
@@ -86,7 +86,7 @@ func (nn *NeuralNetwork) Update(inputs []float32) []float32 {
 	}
 
 	for i := 0; i < nn.nh-1; i++ {
-		var sum float32 = 0.0
+		var sum float64 = 0.0
 		for j := 0; j < nn.ni; j++ {
 			sum += nn.ai[j] * nn.wi[j][i]
 		}
@@ -94,7 +94,7 @@ func (nn *NeuralNetwork) Update(inputs []float32) []float32 {
 	}
 
 	for i := 0; i < nn.no; i++ {
-		var sum float32 = 0.0
+		var sum float64 = 0.0
 		for j := 0; j < nn.nh; j++ {
 			sum += nn.ah[j] * nn.wo[j][i]
 		}
@@ -108,10 +108,10 @@ func (nn *NeuralNetwork) Update(inputs []float32) []float32 {
 	return nn.ao
 }
 
-func (nn *NeuralNetwork) BackPropagate(targets []float32, lRate, mFactor float32) float32 {
+func (nn *NeuralNetwork) BackPropagate(targets []float64, lRate, mFactor float64) float64 {
 	if len(targets) != nn.no {
 		fmt.Println("Error: wrong number of target values")
-		return float32(0.0)
+		return 0.0
 	}
 
 	output_deltas := vector(nn.no, 0.0)
@@ -125,7 +125,7 @@ func (nn *NeuralNetwork) BackPropagate(targets []float32, lRate, mFactor float32
 
 	hidden_deltas := vector(nn.nh, 0.0)
 	for i := 0; i < nn.nh; i++ {
-		var e float32 = 0.0
+		var e float64 = 0.0
 
 		for j := 0; j < nn.no; j++ {
 			e += output_deltas[j] * nn.wo[i][j]
@@ -149,18 +149,18 @@ func (nn *NeuralNetwork) BackPropagate(targets []float32, lRate, mFactor float32
 		}
 	}
 
-	var e float32 = 0.0
+	var e float64 = 0.0
 
 	for i := 0; i < len(targets); i++ {
-		e += 0.5 * (float32(math.Pow(float64(targets[i]-nn.ao[i]), 2)))
+		e += 0.5 * math.Pow(targets[i]-nn.ao[i], 2)
 	}
 
 	return e
 }
 
-func (nn *NeuralNetwork) Train(patterns [][][]float32, iterations int, lRate, mFactor float32) {
+func (nn *NeuralNetwork) Train(patterns [][][]float64, iterations int, lRate, mFactor float64) {
 	for i := 0; i < iterations; i++ {
-		var e float32 = 0.0
+		var e float64 = 0.0
 		for _, p := range patterns {
 			nn.Update(p[0])
 
@@ -174,7 +174,7 @@ func (nn *NeuralNetwork) Train(patterns [][][]float32, iterations int, lRate, mF
 	}
 }
 
-func (nn *NeuralNetwork) Test(patterns [][][]float32) {
+func (nn *NeuralNetwork) Test(patterns [][][]float64) {
 	for _, p := range patterns {
 		fmt.Println(p[0], "->", nn.Update(p[0]), " : ", p[1])
 	}
