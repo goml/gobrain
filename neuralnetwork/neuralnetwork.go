@@ -158,7 +158,9 @@ func (nn *NeuralNetwork) BackPropagate(targets []float64, lRate, mFactor float64
 	return e
 }
 
-func (nn *NeuralNetwork) Train(patterns [][][]float64, iterations int, lRate, mFactor float64) {
+func (nn *NeuralNetwork) Train(patterns [][][]float64, iterations int, lRate, mFactor float64) []float64 {
+	errors := make([]float64, iterations)
+
 	for i := 0; i < iterations; i++ {
 		var e float64 = 0.0
 		for _, p := range patterns {
@@ -168,10 +170,10 @@ func (nn *NeuralNetwork) Train(patterns [][][]float64, iterations int, lRate, mF
 			e += tmp
 		}
 
-		if i%100 == 0 {
-			fmt.Printf("Error %e\n", e)
-		}
+		errors[i] = e
 	}
+
+	return errors
 }
 
 func (nn *NeuralNetwork) Test(patterns [][][]float64) {
