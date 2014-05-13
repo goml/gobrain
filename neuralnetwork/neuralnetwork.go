@@ -27,11 +27,11 @@ func vector(I int, fill float64) []float64 {
 }
 
 func sigmoid(x float64) float64 {
-	return math.Tanh(x)
+	return 1 / (1 + math.Exp(-x))
 }
 
 func dsigmoid(y float64) float64 {
-	return 1.0 - y*y
+	return y * (1 - y)
 }
 
 type NeuralNetwork struct {
