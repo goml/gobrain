@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"math/rand"
 
-	"./neuralnetwork"
+	"./nn"
 )
 
 func main() {
@@ -17,12 +17,10 @@ func main() {
 		{{1, 1}, {0}},
 	}
 
-	nn := neuralnetwork.New(2, 2, 1, false)
+	ff := &nn.FeedForward{}
 
-	fmt.Println(nn)
-
-	nn.Train(patterns, 1000, 0.6, 0.4)
-
-	nn.Test(patterns)
+	ff.Init(2, 2, 1, false)
+	ff.Train(patterns, 1000, 0.6, 0.4, false)
+	ff.Test(patterns)
 
 }
