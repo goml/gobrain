@@ -1,6 +1,7 @@
 package nn
 
 import (
+	"log"
 	"fmt"
 	"math"
 )
@@ -50,8 +51,7 @@ func (nn *FeedForward) Init(inputs, hiddens, outputs int, regression bool) {
 
 func (nn *FeedForward) Update(inputs []float64) []float64 {
 	if len(inputs) != nn.NInputs-1 {
-		fmt.Println("Error: wrong number of inputs")
-		return []float64{} // should return error
+		log.Fatal("Error: wrong number of inputs")
 	}
 
 	for i := 0; i < nn.NInputs-1; i++ {
@@ -83,41 +83,40 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 
 func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) float64 {
 	if len(targets) != nn.NOutputs {
-		fmt.Println("Error: wrong number of target values")
-		return 0.0
+		log.Fatal("Error: wrong number of target values")
 	}
 
-	output_deltas := vector(nn.NOutputs, 0.0)
+	outputDeltas := vector(nn.NOutputs, 0.0)
 	for i := 0; i < nn.NOutputs; i++ {
-		output_deltas[i] = targets[i] - nn.OutputActivations[i]
+		outputDeltas[i] = targets[i] - nn.OutputActivations[i]
 
 		if !nn.Regression {
-			output_deltas[i] = dsigmoid(nn.OutputActivations[i]) * output_deltas[i]
+			outputDeltas[i] = dsigmoid(nn.OutputActivations[i]) * outputDeltas[i]
 		}
 	}
 
-	hidden_deltas := vector(nn.NHiddens, 0.0)
+	hiddenDeltas := vector(nn.NHiddens, 0.0)
 	for i := 0; i < nn.NHiddens; i++ {
 		var e float64 = 0.0
 
 		for j := 0; j < nn.NOutputs; j++ {
-			e += output_deltas[j] * nn.OutputWeights[i][j]
+			e += outputDeltas[j] * nn.OutputWeights[i][j]
 		}
-		hidden_deltas[i] = dsigmoid(nn.HiddenActivations[i]) * e
+		hiddenDeltas[i] = dsigmoid(nn.HiddenActivations[i]) * e
 	}
 
 	for i := 0; i < nn.NHiddens; i++ {
 		for j := 0; j < nn.NOutputs; j++ {
-			change := output_deltas[j] * nn.HiddenActivations[i]
-			nn.OutputWeights[i][j] = nn.OutputWeights[i][j] + lRate*change + mFactor*nn.OutputChanges[i][j]
+			change := outputDeltas[j] * nn.HiddenActivations[i]
+			nn.OutputWeights[i][j] = nn.OutputWeights[i][j] + lRate * change + mFactor * nn.OutputChanges[i][j]
 			nn.OutputChanges[i][j] = change
 		}
 	}
 
 	for i := 0; i < nn.NInputs; i++ {
 		for j := 0; j < nn.NHiddens; j++ {
-			change := hidden_deltas[j] * nn.InputActivations[i]
-			nn.InputWeights[i][j] = nn.InputWeights[i][j] + lRate*change + mFactor*nn.InputChanges[i][j]
+			change := hiddenDeltas[j] * nn.InputActivations[i]
+			nn.InputWeights[i][j] = nn.InputWeights[i][j] + lRate * change + mFactor * nn.InputChanges[i][j]
 			nn.InputChanges[i][j] = change
 		}
 	}
@@ -125,7 +124,7 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 	var e float64 = 0.0
 
 	for i := 0; i < len(targets); i++ {
-		e += 0.5 * math.Pow(targets[i]-nn.OutputActivations[i], 2)
+		e += 0.5 * math.Pow(targets[i] - nn.OutputActivations[i], 2)
 	}
 
 	return e
