@@ -6,30 +6,32 @@ import (
 	"math"
 )
 
-type FeedForward struct {
-	// Number of input, hidden and output nodes
+type ElmanRNN struct {
 	NInputs, NHiddens, NOutputs int
-	// Whether it is regression or not
-	Regression bool
-	// Activations for nodes
-	InputActivations, HiddenActivations, OutputActivations []float64
-	// Weights
+
+	InputActivations  []float64
+	HiddenActivations []float64
+	OutputActivations []float64
+	Context           []float64
+	Context2          []float64
+	Context3          []float64
+
 	InputWeights, OutputWeights [][]float64
-	// Last change in weights for momentum
+
 	InputChanges, OutputChanges [][]float64
 }
 
-// Initialize the neural network
-func (nn *FeedForward) Init(inputs, hiddens, outputs int, regression bool) {
+func (nn *ElmanRNN) Init(inputs, hiddens, outputs int) {
 	nn.NInputs = inputs + 1   // +1 for bias
 	nn.NHiddens = hiddens + 1 // +1 for bias
 	nn.NOutputs = outputs
-	nn.Regression = regression
 
 	nn.InputActivations = vector(nn.NInputs, 1.0)
 	nn.HiddenActivations = vector(nn.NHiddens, 1.0)
 	nn.OutputActivations = vector(nn.NOutputs, 1.0)
-
+	nn.Context = vector(nn.NHiddens, 0.5)
+	nn.Context2 = vector(nn.NHiddens, 0.5)
+	nn.Context3 = vector(nn.NHiddens, 0.5)
 	nn.InputWeights = matrix(nn.NInputs, nn.NHiddens)
 	nn.OutputWeights = matrix(nn.NHiddens, nn.NOutputs)
 
@@ -49,7 +51,7 @@ func (nn *FeedForward) Init(inputs, hiddens, outputs int, regression bool) {
 	nn.OutputChanges = matrix(nn.NHiddens, nn.NOutputs)
 }
 
-func (nn *FeedForward) Update(inputs []float64) []float64 {
+func (nn *ElmanRNN) Update(inputs []float64) []float64 {
 	if len(inputs) != nn.NInputs-1 {
 		log.Fatal("Error: wrong number of inputs")
 	}
@@ -60,10 +62,24 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 
 	for i := 0; i < nn.NHiddens-1; i++ {
 		var sum float64 = 0.0
+
 		for j := 0; j < nn.NInputs; j++ {
 			sum += nn.InputActivations[j] * nn.InputWeights[j][i]
 		}
-		nn.HiddenActivations[i] = sigmoid(sum)
+
+		for j := 0; j < nn.NHiddens-1; j++ {
+			sum += nn.Context[j]
+		}
+
+		for j := 0; j < nn.NHiddens-1; j++ {
+			sum += nn.Context2[j]
+		}
+
+		activation := sigmoid(sum)
+
+		nn.Context2[i] = nn.Context[i]
+		nn.HiddenActivations[i] = activation
+		nn.Context[i] = activation
 	}
 
 	for i := 0; i < nn.NOutputs; i++ {
@@ -71,17 +87,14 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 		for j := 0; j < nn.NHiddens; j++ {
 			sum += nn.HiddenActivations[j] * nn.OutputWeights[j][i]
 		}
-		if nn.Regression {
-			nn.OutputActivations[i] = sum
-		} else {
-			nn.OutputActivations[i] = sigmoid(sum)
-		}
+
+		nn.OutputActivations[i] = sigmoid(sum)
 	}
 
 	return nn.OutputActivations
 }
 
-func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) float64 {
+func (nn *ElmanRNN) BackPropagate(targets []float64, lRate, mFactor float64) float64 {
 	if len(targets) != nn.NOutputs {
 		log.Fatal("Error: wrong number of target values")
 	}
@@ -90,9 +103,7 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 	for i := 0; i < nn.NOutputs; i++ {
 		outputDeltas[i] = targets[i] - nn.OutputActivations[i]
 
-		if !nn.Regression {
-			outputDeltas[i] = dsigmoid(nn.OutputActivations[i]) * outputDeltas[i]
-		}
+		outputDeltas[i] = dsigmoid(nn.OutputActivations[i]) * outputDeltas[i]
 	}
 
 	hiddenDeltas := vector(nn.NHiddens, 0.0)
@@ -130,7 +141,7 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 	return e
 }
 
-func (nn *FeedForward) Train(patterns [][][]float64, iterations int, lRate, mFactor float64, debug bool) []float64 {
+func (nn *ElmanRNN) Train(patterns [][][]float64, iterations int, lRate, mFactor float64, debug bool) []float64 {
 	errors := make([]float64, iterations)
 
 	for i := 0; i < iterations; i++ {
@@ -152,7 +163,7 @@ func (nn *FeedForward) Train(patterns [][][]float64, iterations int, lRate, mFac
 	return errors
 }
 
-func (nn *FeedForward) Test(patterns [][][]float64) {
+func (nn *ElmanRNN) Test(patterns [][][]float64) {
 	for _, p := range patterns {
 		fmt.Println(p[0], "->", nn.Update(p[0]), " : ", p[1])
 	}
