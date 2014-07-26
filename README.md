@@ -7,7 +7,7 @@ Neural Networks written in go
 The version `1.0.0` includes just basic Neural Network functions such as Feed Forward and Elman Recurrent Neural Network.
 A simple Feed Forward Neural Network can be constructed and trained as follows:
 
-```golang
+```go
 // set the random seed to 0
 rand.Seed(0)
 
@@ -38,7 +38,7 @@ After running this code the network will be trained and ready to be used.
 
 The network can be tested running using the `Test` method, for instance:
 
-```golang
+```go
 ff.Test(patterns)
 ```
 
