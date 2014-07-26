@@ -13,6 +13,8 @@ type FeedForward struct {
 	Regression bool
 	// Activations for nodes
 	InputActivations, HiddenActivations, OutputActivations []float64
+	// ElmanRNN contexts
+	Contexts [][]float64
 	// Weights
 	InputWeights, OutputWeights [][]float64
 	// Last change in weights for momentum
@@ -20,11 +22,10 @@ type FeedForward struct {
 }
 
 // Initialize the neural network
-func (nn *FeedForward) Init(inputs, hiddens, outputs int, regression bool) {
+func (nn *FeedForward) Init(inputs, hiddens, outputs int) {
 	nn.NInputs = inputs + 1   // +1 for bias
 	nn.NHiddens = hiddens + 1 // +1 for bias
 	nn.NOutputs = outputs
-	nn.Regression = regression
 
 	nn.InputActivations = vector(nn.NInputs, 1.0)
 	nn.HiddenActivations = vector(nn.NHiddens, 1.0)
@@ -49,6 +50,18 @@ func (nn *FeedForward) Init(inputs, hiddens, outputs int, regression bool) {
 	nn.OutputChanges = matrix(nn.NHiddens, nn.NOutputs)
 }
 
+func (nn *FeedForward) SetContexts(nContexts int, initValues [][]float64) {
+	if initValues == nil {
+		initValues = make([][]float64, nContexts)
+
+		for i := 0; i < nContexts; i++ {
+			initValues[i] = vector(nn.NHiddens, 0.5)
+		}
+	}
+
+	nn.Contexts = initValues
+}
+
 func (nn *FeedForward) Update(inputs []float64) []float64 {
 	if len(inputs) != nn.NInputs-1 {
 		log.Fatal("Error: wrong number of inputs")
@@ -60,10 +73,27 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 
 	for i := 0; i < nn.NHiddens-1; i++ {
 		var sum float64 = 0.0
+
 		for j := 0; j < nn.NInputs; j++ {
 			sum += nn.InputActivations[j] * nn.InputWeights[j][i]
 		}
+
+		// compute contexts sum
+		for k := 0; k < len(nn.Contexts); k++ {
+			for j := 0; j < nn.NHiddens-1; j++ {
+				sum += nn.Contexts[k][j]
+			}
+		}
+
 		nn.HiddenActivations[i] = sigmoid(sum)
+	}
+
+	// update the contexts
+	if len(nn.Contexts) > 0 {
+		for i := len(nn.Contexts) - 1; i > 0; i-- {
+			nn.Contexts[i] = nn.Contexts[i-1]
+		}
+		nn.Contexts[0] = nn.HiddenActivations
 	}
 
 	for i := 0; i < nn.NOutputs; i++ {
@@ -71,11 +101,8 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 		for j := 0; j < nn.NHiddens; j++ {
 			sum += nn.HiddenActivations[j] * nn.OutputWeights[j][i]
 		}
-		if nn.Regression {
-			nn.OutputActivations[i] = sum
-		} else {
-			nn.OutputActivations[i] = sigmoid(sum)
-		}
+
+		nn.OutputActivations[i] = sigmoid(sum)
 	}
 
 	return nn.OutputActivations
@@ -88,11 +115,7 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 
 	outputDeltas := vector(nn.NOutputs, 0.0)
 	for i := 0; i < nn.NOutputs; i++ {
-		outputDeltas[i] = targets[i] - nn.OutputActivations[i]
-
-		if !nn.Regression {
-			outputDeltas[i] = dsigmoid(nn.OutputActivations[i]) * outputDeltas[i]
-		}
+		outputDeltas[i] = dsigmoid(nn.OutputActivations[i]) * (targets[i] - nn.OutputActivations[i])
 	}
 
 	hiddenDeltas := vector(nn.NHiddens, 0.0)
@@ -102,6 +125,7 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 		for j := 0; j < nn.NOutputs; j++ {
 			e += outputDeltas[j] * nn.OutputWeights[i][j]
 		}
+
 		hiddenDeltas[i] = dsigmoid(nn.HiddenActivations[i]) * e
 	}
 
