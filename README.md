@@ -53,6 +53,15 @@ The test operation will print in the console something like:
 
 Where the first values are the inputs, the values after the arrow `->` are the output values from the network and the values after `:` are the expected outputs.
 
+The method `Update` can be used to predict the output given an input, for example:
+
+```go
+inputs := []float64{1, 1}
+ff.Update(inputs)
+```
+
+the output will be a vector with values ranging from `0` to `1`.
+
 ## Recurrent Neural Network
 
 
