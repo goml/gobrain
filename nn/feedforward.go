@@ -48,7 +48,6 @@ The method `Update` can be used to predict the output given an input, for exampl
 
 the output will be a vector with values ranging from `0` to `1`.
 */
-
 package nn
 
 import (
