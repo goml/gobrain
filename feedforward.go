@@ -13,7 +13,7 @@ A simple Feed Forward Neural Network can be constructed and trained as follows:
 	}
 
 	// instantiate the Feed Forward
-	ff := &nn.FeedForward{}
+	ff := &gobrain.FeedForward{}
 
 	// initialize the Neural Network;
 	// the networks structure will contain:
@@ -48,7 +48,7 @@ The method `Update` can be used to predict the output given an input, for exampl
 
 the output will be a vector with values ranging from `0` to `1`.
 */
-package nn
+package gobrain
 
 import (
 	"fmt"

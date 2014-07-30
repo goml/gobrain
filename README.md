@@ -20,7 +20,7 @@ patterns := [][][]float64{
 }
 
 // instantiate the Feed Forward
-ff := &nn.FeedForward{}
+ff := &gobrain.FeedForward{}
 
 // initialize the Neural Network;
 // the networks structure will contain:
