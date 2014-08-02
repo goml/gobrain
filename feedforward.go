@@ -100,6 +100,15 @@ func (nn *FeedForward) Init(inputs, hiddens, outputs int) {
 	nn.OutputChanges = matrix(nn.NHiddens, nn.NOutputs)
 }
 
+/*
+ Set the number of contexts to add to the network. By default the network do not have any context
+ so it is a simple Feed Forward network. When contexts are added the network behaves like an Elman's
+ SRN (simple recurrent networks).
+ The first parameter `nContexts` is used to indicate the number of contexts to be used.
+ The second parameter `initValues` can be used to create custom initialized contexts.
+ If `initValues` is set the first parameter `nContexts` is ignored and the contexts provided in `initValues` are used.
+ The contexts must have the same size of hidden nodes + 1 (plus a bias node)
+*/
 func (nn *FeedForward) SetContexts(nContexts int, initValues [][]float64) {
 	if initValues == nil {
 		initValues = make([][]float64, nContexts)
