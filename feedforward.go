@@ -1,6 +1,4 @@
-/*
-	Neural Networks written in go.
-*/
+// Package gobrain provides basic neural networks algorithms.
 package gobrain
 
 import (
@@ -9,6 +7,7 @@ import (
 	"math"
 )
 
+// FeedForwad struct is used to represent a simple neural network
 type FeedForward struct {
 	// Number of input, hidden and output nodes
 	NInputs, NHiddens, NOutputs int
@@ -59,7 +58,7 @@ func (nn *FeedForward) Init(inputs, hiddens, outputs int) {
 // SRN (simple recurrent networks). The first parameter (nContexts) is used to indicate the number of contexts to be used.
 // The second parameter (initValues) can be used to create custom initialized contexts.
 // If 'initValues' is set the first parameter 'nContexts' is ignored and the contexts provided in 'initValues' are used.
-// The when using 'initValues' note that contexts must have the same size of hidden nodes + 1 (plus a bias node)
+// The when using 'initValues' note that contexts must have the same size of hidden nodes + 1 (plus a bias node).
 func (nn *FeedForward) SetContexts(nContexts int, initValues [][]float64) {
 	if initValues == nil {
 		initValues = make([][]float64, nContexts)
@@ -84,7 +83,7 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 	}
 
 	for i := 0; i < nn.NHiddens-1; i++ {
-		var sum float64 = 0.0
+		var sum float64
 
 		for j := 0; j < nn.NInputs; j++ {
 			sum += nn.InputActivations[j] * nn.InputWeights[j][i]
@@ -109,7 +108,7 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 	}
 
 	for i := 0; i < nn.NOutputs; i++ {
-		var sum float64 = 0.0
+		var sum float64
 		for j := 0; j < nn.NHiddens; j++ {
 			sum += nn.HiddenActivations[j] * nn.OutputWeights[j][i]
 		}
@@ -133,7 +132,7 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 
 	hiddenDeltas := vector(nn.NHiddens, 0.0)
 	for i := 0; i < nn.NHiddens; i++ {
-		var e float64 = 0.0
+		var e float64
 
 		for j := 0; j < nn.NOutputs; j++ {
 			e += outputDeltas[j] * nn.OutputWeights[i][j]
@@ -158,7 +157,7 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 		}
 	}
 
-	var e float64 = 0.0
+	var e float64
 
 	for i := 0; i < len(targets); i++ {
 		e += 0.5 * math.Pow(targets[i]-nn.OutputActivations[i], 2)
@@ -173,7 +172,7 @@ func (nn *FeedForward) Train(patterns [][][]float64, iterations int, lRate, mFac
 	errors := make([]float64, iterations)
 
 	for i := 0; i < iterations; i++ {
-		var e float64 = 0.0
+		var e float64
 		for _, p := range patterns {
 			nn.Update(p[0])
 
