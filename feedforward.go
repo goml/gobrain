@@ -1,52 +1,5 @@
 /*
-A simple Feed Forward Neural Network can be constructed and trained as follows:
-
-	// set the random seed to 0
-	rand.Seed(0)
-
-	// create the XOR representation patter to train the network
-	patterns := [][][]float64{
-	  {{0, 0}, {0}},
-	  {{0, 1}, {1}},
-	  {{1, 0}, {1}},
-	  {{1, 1}, {0}},
-	}
-
-	// instantiate the Feed Forward
-	ff := &gobrain.FeedForward{}
-
-	// initialize the Neural Network;
-	// the networks structure will contain:
-	// 2 inputs, 2 hidden nodes and 1 output.
-	ff.Init(2, 2, 1)
-
-	// train the network using the XOR patterns
-	// the training will run for 1000 epochs
-	// the learning rate is set to 0.6 and the momentum factor to 0.4
-	// use true in the last parameter to receive reports about the learning error
-	ff.Train(patterns, 1000, 0.6, 0.4, true)
-
-After running this code the network will be trained and ready to be used.
-
-The network can be tested running using the `Test` method, for instance:
-
-	ff.Test(patterns)
-
-The test operation will print in the console something like:
-
-	[0 0] -> [0.057503945708445]  :  [0]
-	[0 1] -> [0.930100635071210]  :  [1]
-	[1 0] -> [0.927809966227284]  :  [1]
-	[1 1] -> [0.097408795324620]  :  [0]
-
-Where the first values are the inputs, the values after the arrow `->` are the output values from the network and the values after `:` are the expected outputs.
-
-The method `Update` can be used to predict the output given an input, for example:
-
-	inputs := []float64{1, 1}
-	ff.Update(inputs)
-
-the output will be a vector with values ranging from `0` to `1`.
+	Neural Networks written in go.
 */
 package gobrain
 
@@ -71,7 +24,8 @@ type FeedForward struct {
 	InputChanges, OutputChanges [][]float64
 }
 
-// Initialize the neural network
+// Initialize the neural network; the inputs value is the number of inputs the network will have,
+// the hiddens value is the number of hidden nodes and the outputs value is the number of the outputs of the network.
 func (nn *FeedForward) Init(inputs, hiddens, outputs int) {
 	nn.NInputs = inputs + 1   // +1 for bias
 	nn.NHiddens = hiddens + 1 // +1 for bias
@@ -100,15 +54,12 @@ func (nn *FeedForward) Init(inputs, hiddens, outputs int) {
 	nn.OutputChanges = matrix(nn.NHiddens, nn.NOutputs)
 }
 
-/*
- Set the number of contexts to add to the network. By default the network do not have any context
- so it is a simple Feed Forward network. When contexts are added the network behaves like an Elman's
- SRN (simple recurrent networks).
- The first parameter `nContexts` is used to indicate the number of contexts to be used.
- The second parameter `initValues` can be used to create custom initialized contexts.
- If `initValues` is set the first parameter `nContexts` is ignored and the contexts provided in `initValues` are used.
- The contexts must have the same size of hidden nodes + 1 (plus a bias node)
-*/
+// Set the number of contexts to add to the network. By default the network do not have any context
+// so it is a simple Feed Forward network. When contexts are added the network behaves like an Elman's
+// SRN (simple recurrent networks). The first parameter (nContexts) is used to indicate the number of contexts to be used.
+// The second parameter (initValues) can be used to create custom initialized contexts.
+// If 'initValues' is set the first parameter 'nContexts' is ignored and the contexts provided in 'initValues' are used.
+// The when using 'initValues' note that contexts must have the same size of hidden nodes + 1 (plus a bias node)
 func (nn *FeedForward) SetContexts(nContexts int, initValues [][]float64) {
 	if initValues == nil {
 		initValues = make([][]float64, nContexts)
@@ -121,6 +72,8 @@ func (nn *FeedForward) SetContexts(nContexts int, initValues [][]float64) {
 	nn.Contexts = initValues
 }
 
+// The Update method is used to activate the Neural Network. Given an array of inputs, it returns an array,
+// of length equivalent of number of outputs, with values ranging from 0 to 1.
 func (nn *FeedForward) Update(inputs []float64) []float64 {
 	if len(inputs) != nn.NInputs-1 {
 		log.Fatal("Error: wrong number of inputs")
@@ -167,6 +120,7 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 	return nn.OutputActivations
 }
 
+// The BackPropagate method is used, when training the Neural Network, to back propagate the errors from network activation.
 func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) float64 {
 	if len(targets) != nn.NOutputs {
 		log.Fatal("Error: wrong number of target values")
@@ -213,6 +167,8 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 	return e
 }
 
+// This method is used to train the Network, it will run the training operation for 'iterations' times
+// and return the computed errors when training.
 func (nn *FeedForward) Train(patterns [][][]float64, iterations int, lRate, mFactor float64, debug bool) []float64 {
 	errors := make([]float64, iterations)
 
