@@ -4,6 +4,8 @@ Neural Networks written in go
 
 [![GoDoc](https://godoc.org/github.com/goml/gobrain?status.svg)](https://godoc.org/github.com/goml/gobrain)
 
+[![Build Status](https://travis-ci.org/goml/gobrain.svg?branch=master)](https://travis-ci.org/goml/gobrain)
+
 ## Getting Started
 The version `1.0.0` includes just basic Neural Network functions such as Feed Forward and Elman Recurrent Neural Network.
 A simple Feed Forward Neural Network can be constructed and trained as follows:
