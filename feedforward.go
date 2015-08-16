@@ -23,8 +23,13 @@ type FeedForward struct {
 	InputChanges, OutputChanges [][]float64
 }
 
-// Initialize the neural network; the inputs value is the number of inputs the network will have,
-// the hiddens value is the number of hidden nodes and the outputs value is the number of the outputs of the network.
+/*
+Initialize the neural network;
+
+the 'inputs' value is the number of inputs the network will have,
+the 'hiddens' value is the number of hidden nodes and
+the 'outputs' value is the number of the outputs of the network.
+*/
 func (nn *FeedForward) Init(inputs, hiddens, outputs int) {
 	nn.NInputs = inputs + 1   // +1 for bias
 	nn.NHiddens = hiddens + 1 // +1 for bias
@@ -53,12 +58,20 @@ func (nn *FeedForward) Init(inputs, hiddens, outputs int) {
 	nn.OutputChanges = matrix(nn.NHiddens, nn.NOutputs)
 }
 
-// Set the number of contexts to add to the network. By default the network do not have any context
-// so it is a simple Feed Forward network. When contexts are added the network behaves like an Elman's
-// SRN (simple recurrent networks). The first parameter (nContexts) is used to indicate the number of contexts to be used.
-// The second parameter (initValues) can be used to create custom initialized contexts.
-// If 'initValues' is set the first parameter 'nContexts' is ignored and the contexts provided in 'initValues' are used.
-// The when using 'initValues' note that contexts must have the same size of hidden nodes + 1 (plus a bias node).
+/*
+Set the number of contexts to add to the network.
+
+By default the network do not have any context so it is a simple Feed Forward network,
+when contexts are added the network behaves like an Elman's SRN (simple recurrent networks).
+
+The first parameter (nContexts) is used to indicate the number of contexts to be used,
+the second parameter (initValues) can be used to create custom initialized contexts.
+
+If 'initValues' is set the first parameter 'nContexts' is ignored and
+the contexts provided in 'initValues' are used.
+
+When using 'initValues' note that contexts must have the same size of hidden nodes + 1 (bias node).
+*/
 func (nn *FeedForward) SetContexts(nContexts int, initValues [][]float64) {
 	if initValues == nil {
 		initValues = make([][]float64, nContexts)
@@ -71,8 +84,11 @@ func (nn *FeedForward) SetContexts(nContexts int, initValues [][]float64) {
 	nn.Contexts = initValues
 }
 
-// The Update method is used to activate the Neural Network. Given an array of inputs, it returns an array,
-// of length equivalent of number of outputs, with values ranging from 0 to 1.
+/*
+The Update method is used to activate the Neural Network.
+
+Given an array of inputs, it returns an array, of length equivalent of number of outputs, with values ranging from 0 to 1.
+*/
 func (nn *FeedForward) Update(inputs []float64) []float64 {
 	if len(inputs) != nn.NInputs-1 {
 		log.Fatal("Error: wrong number of inputs")
@@ -118,8 +134,10 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 
 	return nn.OutputActivations
 }
-
-// The BackPropagate method is used, when training the Neural Network, to back propagate the errors from network activation.
+/*
+The BackPropagate method is used, when training the Neural Network,
+to back propagate the errors from network activation.
+*/
 func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) float64 {
 	if len(targets) != nn.NOutputs {
 		log.Fatal("Error: wrong number of target values")
@@ -165,9 +183,10 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 
 	return e
 }
-
-// This method is used to train the Network, it will run the training operation for 'iterations' times
-// and return the computed errors when training.
+/*
+This method is used to train the Network, it will run the training operation for 'iterations' times
+and return the computed errors when training.
+*/
 func (nn *FeedForward) Train(patterns [][][]float64, iterations int, lRate, mFactor float64, debug bool) []float64 {
 	errors := make([]float64, iterations)
 
