@@ -66,6 +66,25 @@ the output will be a vector with values ranging from `0` to `1`.
 
 ## Recurrent Neural Network
 
+This library implements Elman's Simple Recurrent Network.
+
+To take advantage of this, one can use the `SetContexts` function.
+
+```go
+ff.SetContexts(1, nil)
+```
+
+In the example above, a single context will be created initilized with `0.5`. It is also possible
+to create custom initilized contexts, for instance:
+
+```go
+contexts := [][]float64{
+	{0.5, 0.8, 0.1}
+}
+```
+
+Note that custom contexts must have the same size of hidden nodes + 1 (bias node),
+in the example above the size of hidden nodes is 2, thus the context has 3 values.
 
 ## Changelog
 * 1.0.0 - Added Feed Forward Neural Network with contexts from Elman RNN
