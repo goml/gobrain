@@ -74,6 +74,8 @@ ff.Update(inputs)
 
 the output will be a vector with values ranging from `0` to `1`.
 
+In the example folder there are runnable examples with persistence of the trained network on file.
+
 ## Recurrent Neural Network
 
 This library implements Elman's Simple Recurrent Network.
