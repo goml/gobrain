@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/axamon/gobrain"
+	"github.com/goml/gobrain"
 )
 
 func main() {
