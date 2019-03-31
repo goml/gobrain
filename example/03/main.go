@@ -5,8 +5,8 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/axamon/gobrain/persist"
 	"github.com/goml/gobrain"
+	"github.com/goml/gobrain/persist"
 )
 
 func main() {
