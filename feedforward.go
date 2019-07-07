@@ -9,8 +9,8 @@ import (
 
 // FeedForwad struct is used to represent a simple neural network
 type FeedForward struct {
-	// Number of input, hidden and output nodes
-	NInputs, NHiddens, NOutputs int
+	// Number of input, hidden, output nodes and contexts
+	NInputs, NHiddens, NOutputs, NContexts int
 	// Whether it is regression or not
 	Regression bool
 	// Activations for nodes
@@ -19,8 +19,10 @@ type FeedForward struct {
 	Contexts [][]float64
 	// Weights
 	InputWeights, OutputWeights [][]float64
+	ContextWeights [][][]float64
 	// Last change in weights for momentum
 	InputChanges, OutputChanges [][]float64
+	ContextChanges [][][]float64
 }
 
 /*
@@ -81,7 +83,37 @@ func (nn *FeedForward) SetContexts(nContexts int, initValues [][]float64) {
 		}
 	}
 
+	nn.NContexts = len(initValues)
+
+	nn.ContextWeights = make([][][]float64, nn.NContexts)
+	nn.ContextChanges = make([][][]float64, nn.NContexts)
+
+	for i := 0; i < nn.NContexts; i++ {
+		nn.ContextWeights[i] = matrix(nn.NHiddens, nn.NHiddens)
+		nn.ContextChanges[i] = matrix(nn.NHiddens, nn.NHiddens)
+
+		for j := 0; j < nn.NHiddens; j++ {
+			for k := 0; k < nn.NHiddens; k++ {
+				nn.ContextWeights[i][j][k] = random(-1, 1)
+			}
+		}
+	}
+
 	nn.Contexts = initValues
+}
+
+/*
+Reset the context values.
+
+Useful to remove noise from previous context when the network is given the start of a new sequence.
+This does not affect the context weights.
+*/
+func (nn *FeedForward) ResetContexts() {
+	for i := 0; i < nn.NContexts; i++ {
+		for j := 0; j < nn.NHiddens; j++ {
+			nn.Contexts[i][j] = 0.5
+		}
+	}
 }
 
 /*
@@ -106,9 +138,9 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 		}
 
 		// compute contexts sum
-		for k := 0; k < len(nn.Contexts); k++ {
+		for k := 0; k < nn.NContexts; k++ {
 			for j := 0; j < nn.NHiddens-1; j++ {
-				sum += nn.Contexts[k][j]
+				sum += nn.Contexts[k][j] * nn.ContextWeights[k][j][i]
 			}
 		}
 
@@ -134,6 +166,7 @@ func (nn *FeedForward) Update(inputs []float64) []float64 {
 
 	return nn.OutputActivations
 }
+
 /*
 The BackPropagate method is used, when training the Neural Network,
 to back propagate the errors from network activation.
@@ -167,6 +200,16 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 		}
 	}
 
+	for i := 0; i < nn.NContexts; i++ {
+		for j := 0; j < nn.NHiddens; j++ {
+			for k := 0; k < nn.NHiddens; k++ {
+				change := hiddenDeltas[k] * nn.Contexts[i][j]
+				nn.ContextWeights[i][j][k] = nn.ContextWeights[i][j][k] + lRate*change + mFactor*nn.ContextChanges[i][j][k]
+				nn.ContextChanges[i][j][k] = change
+			}
+		}
+	}
+
 	for i := 0; i < nn.NInputs; i++ {
 		for j := 0; j < nn.NHiddens; j++ {
 			change := hiddenDeltas[j] * nn.InputActivations[i]
@@ -183,6 +226,7 @@ func (nn *FeedForward) BackPropagate(targets []float64, lRate, mFactor float64) 
 
 	return e
 }
+
 /*
 This method is used to train the Network, it will run the training operation for 'iterations' times
 and return the computed errors when training.
