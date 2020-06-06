@@ -92,8 +92,8 @@ To take advantage of this, one can use the `SetContexts` function.
 ff.SetContexts(1, nil)
 ```
 
-In the example above, a single context will be created initilized with `0.5`. It is also possible
-to create custom initilized contexts, for instance:
+In the example above, a single context will be created initialized with `0.5`. It is also possible
+to create custom initialized contexts, for instance:
 
 ```go
 contexts := [][]float64{
