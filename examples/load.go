@@ -1,4 +1,4 @@
-package main
+package examples
 
 import (
 	"fmt"
@@ -9,21 +9,19 @@ import (
 	"github.com/goml/gobrain/persist"
 )
 
-func main() {
+func Load(filename string) {
 	// set the random seed to 0
 	rand.Seed(0)
-
-	filaneme := "../02/ff.network"
 
 	// instantiate the Feed Forward
 	ff := &gobrain.FeedForward{}
 
-	err := persist.Load(filaneme, &ff)
+	err := persist.Load(filename, &ff)
 	if err != nil {
-		log.Println("impossible to save network on file: ", err.Error())
+		log.Println("impossible to load network from file: ", err.Error())
 	}
 
-	// sends inputs to the neular network
+	// sends inputs to the neural network
 	inputs := []float64{1, 1}
 
 	// saves the result
@@ -31,5 +29,4 @@ func main() {
 
 	// prints the result
 	fmt.Println(result)
-
 }

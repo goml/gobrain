@@ -1,7 +1,7 @@
-package main
+package examples
 
 import (
-	// "testing"
+	"fmt"
 	"log"
 	"math/rand"
 
@@ -9,7 +9,7 @@ import (
 	"github.com/goml/gobrain/persist"
 )
 
-func Testmain() {
+func Save(filename string) {
 	// set the random seed to 0
 	rand.Seed(0)
 
@@ -36,22 +36,17 @@ func Testmain() {
 	ff.Train(patterns, 1000, 0.6, 0.4, false)
 
 	// saves neural network to file
-	filaneme := "./ff.network"
-	err := persist.Save(filaneme, ff)
+	err := persist.Save(filename, ff)
 	if err != nil {
 		log.Println("impossible to save network on file: ", err.Error())
 	}
 
-	// testing the network
-	ff.Test(patterns)
-
-	// predicting a value
+	// sends inputs to the neural network
 	inputs := []float64{1, 1}
-	ff.Update(inputs)
 
-	// Output:
-	// [0 0] -> [0.05750394570844524]  :  [0]
-	// [0 1] -> [0.9301006350712102]  :  [1]
-	// [1 0] -> [0.927809966227284]  :  [1]
-	// [1 1] -> [0.09740879532462095]  :  [0]
+	// saves the result
+	result := ff.Update(inputs)
+
+	// prints the result
+	fmt.Println(result)
 }
