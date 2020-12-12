@@ -31,5 +31,5 @@ jobs:
       - name: Test
         run: go test -v ./...
 
-      - name: Examples test
+      - name: Examples Test
         run: cd examples && go test -v ./...

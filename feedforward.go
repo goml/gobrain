@@ -19,10 +19,10 @@ type FeedForward struct {
 	Contexts [][]float64
 	// Weights
 	InputWeights, OutputWeights [][]float64
-	ContextWeights [][][]float64
+	ContextWeights              [][][]float64
 	// Last change in weights for momentum
 	InputChanges, OutputChanges [][]float64
-	ContextChanges [][][]float64
+	ContextChanges              [][][]float64
 }
 
 /*
