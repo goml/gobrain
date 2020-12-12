@@ -36,16 +36,16 @@ func Testmain() {
 	ff.Train(patterns, 1000, 0.6, 0.4, false)
 
 	// saves neural network to file
-	filaneme := "./ff.network"
-	err := persist.Save(filaneme, ff)
+	filename := "./ff.network"
+	err := persist.Save(filename, ff)
 	if err != nil {
 		log.Println("impossible to save network on file: ", err.Error())
 	}
 
 	// Loads neural network from file
-	err = persist.Load(filaneme, &ff)
+	err = persist.Load(filename, &ff)
 	if err != nil {
-		log.Println("impossible to save network on file: ", err.Error())
+		log.Println("impossible to load network from file: ", err.Error())
 	}
 
 	// testing the network
