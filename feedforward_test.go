@@ -5,7 +5,7 @@ import (
     "math/rand"
 )
 
-func ExampleSimpleFeedForward() {
+func ExampleFeedForward() {
     // set the random seed to 0
     rand.Seed(0)
 

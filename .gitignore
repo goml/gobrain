@@ -23,8 +23,10 @@ _testmain.go
 *.test
 
 test.go
-example/01/01
-example/02/02
-example/03/03
+examples/01/01
+examples/02/02
+examples/03/03
 
 .idea
+
+examples/_saved.network

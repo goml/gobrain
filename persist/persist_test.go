@@ -1,12 +1,10 @@
-package persist_test
+package persist
 
 import (
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-
-	"github.com/goml/gobrain/persist"
 )
 
 const value string = `{"foo": "bar"}`
@@ -16,7 +14,7 @@ var storingFile = "./persiststorefile_tobedeleted"
 func ExampleSave() {
 	defer os.Remove(storingFile)
 
-	persist.Save(storingFile, value)
+	Save(storingFile, value)
 
 	fileRead, _ := ioutil.ReadFile(storingFile)
 	str := string(fileRead)
@@ -31,7 +29,7 @@ func ExampleLoad() {
 	ioutil.WriteFile(storingFile, []byte(value), 0666)
 
 	var fileLoaded interface{}
-	err := persist.Load(storingFile, &fileLoaded)
+	err := Load(storingFile, &fileLoaded)
 	if err != nil {
 		log.Println(err.Error())
 	}

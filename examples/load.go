@@ -1,4 +1,4 @@
-package main
+package examples
 
 import (
 	"fmt"
@@ -9,11 +9,9 @@ import (
 	"github.com/goml/gobrain/persist"
 )
 
-func main() {
+func Load(filename string) {
 	// set the random seed to 0
 	rand.Seed(0)
-
-	filename := "../02/ff.network"
 
 	// instantiate the Feed Forward
 	ff := &gobrain.FeedForward{}
@@ -31,5 +29,4 @@ func main() {
 
 	// prints the result
 	fmt.Println(result)
-
 }
